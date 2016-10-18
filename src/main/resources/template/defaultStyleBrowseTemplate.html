@@ -1,0 +1,13 @@
+<!--预览视图-->
+<div class="floor-banner" xmlns:th="http://www.thymeleaf.org" th:id="${componentId}">
+    <div class="floor-banner-main">
+        <a class="fore" target="_blank" th:each="mallProduct:${dataList}"
+           th:href="@{/${mallProduct.contentURI}}" href="javascript:void(0)" >
+            <img th:each="galleryItem : ${mallProduct.galleryItems}"
+                 res:src="${galleryItem.thumbUri}"
+                 src="http://img20.360buyimg.com/da/jfs/t3070/130/3953760100/24623/a986183e/57fb5fa1N087f1ad2.jpg"
+                 width="400" height="125">
+        </a>
+    </div>
+</div>
+<!--/预览视图-->
