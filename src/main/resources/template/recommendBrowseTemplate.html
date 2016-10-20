@@ -1,0 +1,24 @@
+<!--预览视图-->
+<div xmlns:th="http://www.thymeleaf.org" class="recommend" th:id="${componentId}">
+    <div class="recommend-title" th:object="${productCategoryModel}">
+        <h3 th:text="*{name}">今日推荐</h3>
+    </div>
+    <div class="recommend-list">
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" th:each="mallProduct:${dataList}">
+                    <a th:href="@{/${mallProduct.contentURI}}" href="javascript:void(0)" target="_blank">
+                        <img th:each="galleryItem : ${mallProduct.galleryItems}"
+                             res:src="${galleryItem.thumbUri}"
+                             width="250" height="164"
+                             src="//img13.360buyimg.com/da/jfs/t3583/54/20969957/15608/accc998c/57fc50b3N269e24e4.jpg">
+                    </a>
+                </div>
+            </div>
+            <div class="swiper-button-prev  swiper-button-white"></div>
+            <div class="swiper-button-next  swiper-button-white"></div>
+        </div>
+    </div>
+</div>
+
+<!--/预览视图-->

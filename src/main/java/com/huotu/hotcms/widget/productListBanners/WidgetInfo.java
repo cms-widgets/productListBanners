@@ -46,6 +46,8 @@ public class WidgetInfo implements Widget, PreProcessWidget{
     private static final Log log = LogFactory.getLog(WidgetInfo.class);
     private static final String MALL_PRODUCT_SERIAL = "mallProductSerial";
     private static final String DATA_LIST = "dataList";
+    private static final String PRODUCT_CATEGORY_MODEL = "productCategoryModel";
+
     @Override
     public String groupId() {
         return "com.huotu.hotcms.widget.productListBanners";
@@ -79,7 +81,7 @@ public class WidgetInfo implements Widget, PreProcessWidget{
 
     @Override
     public WidgetStyle[] styles() {
-        return new WidgetStyle[]{new DefaultWidgetStyle(),new BrandListWidgetStyle()};
+        return new WidgetStyle[]{new DefaultWidgetStyle(), new BrandListWidgetStyle(), new RecommendWidgetStyle()};
     }
 
     @Override
@@ -96,6 +98,8 @@ public class WidgetInfo implements Widget, PreProcessWidget{
                 ,getClass().getClassLoader()));
         map.put("thumbnail/productListBannerBrand.png",new ClassPathResource("thumbnail/productListBannerBrand.png"
                 ,getClass().getClassLoader()));
+        map.put("thumbnail/recommend.png", new ClassPathResource("thumbnail/recommend.png"
+                , getClass().getClassLoader()));
         return map;
     }
 
@@ -150,6 +154,11 @@ public class WidgetInfo implements Widget, PreProcessWidget{
             list.add(mallProductCategoryModel);
         }
         variables.put(DATA_LIST,list);
+        MallProductCategory mallProductCategory = mallProductCategoryRepository.findBySerial(mallProductSerial);
+        setContentURI(variables, mallProductCategory);
+        MallProductCategoryModel mallProductCategoryModel = mallProductCategory.toMallProductCategoryModel();
+        mallProductCategoryModel.setGalleryItems(galleryItemRepository.findByGallery(mallProductCategory.getGallery()));
+        variables.put(PRODUCT_CATEGORY_MODEL, mallProductCategoryModel);
     }
 
 
