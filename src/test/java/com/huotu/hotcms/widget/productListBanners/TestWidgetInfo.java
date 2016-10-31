@@ -9,18 +9,28 @@
 
 package com.huotu.hotcms.widget.productListBanners;
 
-import java.io.IOException;
-import java.util.function.Function;
-
+import com.huotu.hotcms.service.entity.MallProductCategory;
+import com.huotu.hotcms.service.model.MallProductCategoryModel;
+import com.huotu.hotcms.service.repository.GalleryItemRepository;
+import com.huotu.hotcms.service.repository.MallProductCategoryRepository;
+import com.huotu.hotcms.widget.CMSContext;
 import com.huotu.hotcms.widget.ComponentProperties;
 import com.huotu.hotcms.widget.Widget;
 import com.huotu.hotcms.widget.WidgetStyle;
+import com.huotu.widget.test.Editor;
 import com.huotu.widget.test.WidgetTest;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import com.huotu.widget.test.Editor;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author CJ
  */
@@ -33,8 +43,13 @@ public class TestWidgetInfo extends WidgetTest {
 
     @Override
     protected void editorWork(Widget widget, Editor editor, Supplier<Map<String, Object>> currentWidgetProperties) {
-        Map map = currentWidgetProperties.get();
-        //todo
+        if (widget instanceof WidgetInfo) {
+            WidgetInfo widgetInfo = (WidgetInfo) widget;
+            MallProductCategory mallProductCategory = widgetInfo.initMallProductCategory(null);
+            editor.chooseCategory(WidgetInfo.MALL_PRODUCT_SERIAL, mallProductCategory);
+            Map map = currentWidgetProperties.get();
+            assertThat(mallProductCategory.getSerial()).isEqualTo(map.get(WidgetInfo.MALL_PRODUCT_SERIAL));
+        }
     }
 
     @Override
@@ -42,6 +57,20 @@ public class TestWidgetInfo extends WidgetTest {
             throws IOException {
         ComponentProperties properties = widget.defaultProperties(resourceService);
         WebElement webElement = uiChanger.apply(properties);
+
+        String mallProductSerial = (String) properties.get(WidgetInfo.MALL_PRODUCT_SERIAL);
+        MallProductCategoryRepository mallProductCategoryRepository = widget.getCMSServiceFromCMSContext(MallProductCategoryRepository.class);
+        List<MallProductCategory> mallProductCategorys = mallProductCategoryRepository
+                .findBySiteAndParent_Serial(CMSContext.RequestContext().getSite(), mallProductSerial);
+        GalleryItemRepository galleryItemRepository = widget.getCMSServiceFromCMSContext(GalleryItemRepository.class);
+        List<MallProductCategoryModel> list = new ArrayList<>();
+        for (MallProductCategory mallProductCategory : mallProductCategorys) {
+            MallProductCategoryModel mallProductCategoryModel = mallProductCategory.toMallProductCategoryModel();
+            mallProductCategoryModel.setGalleryItems(galleryItemRepository.findByGallery(mallProductCategory.getGallery()));
+            list.add(mallProductCategoryModel);
+        }
+        assertThat(list.size()).isEqualTo(webElement.findElements(By.tagName("a")).size());
+
 
     }
 

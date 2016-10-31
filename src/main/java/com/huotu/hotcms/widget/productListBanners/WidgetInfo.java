@@ -10,6 +10,7 @@
 package com.huotu.hotcms.widget.productListBanners;
 
 import com.huotu.hotcms.service.common.ContentType;
+import com.huotu.hotcms.service.common.SiteType;
 import com.huotu.hotcms.service.entity.Category;
 import com.huotu.hotcms.service.entity.Gallery;
 import com.huotu.hotcms.service.entity.GalleryItem;
@@ -43,8 +44,8 @@ import java.util.*;
  * @author CJ
  */
 public class WidgetInfo implements Widget, PreProcessWidget{
+    public static final String MALL_PRODUCT_SERIAL = "mallProductSerial";
     private static final Log log = LogFactory.getLog(WidgetInfo.class);
-    private static final String MALL_PRODUCT_SERIAL = "mallProductSerial";
     private static final String DATA_LIST = "dataList";
     private static final String PRODUCT_CATEGORY_MODEL = "productCategoryModel";
 
@@ -123,8 +124,7 @@ public class WidgetInfo implements Widget, PreProcessWidget{
     public ComponentProperties defaultProperties(ResourceService resourceService) throws IOException {
         ComponentProperties properties = new ComponentProperties();
         //查找商城产品数据源
-        MallProductCategoryRepository mallProductCategoryRepository = CMSContext.RequestContext()
-                .getWebApplicationContext().getBean(MallProductCategoryRepository.class);
+        MallProductCategoryRepository mallProductCategoryRepository = getCMSServiceFromCMSContext(MallProductCategoryRepository.class);
         List<MallProductCategory> mallProductCategoryList = mallProductCategoryRepository.findBySite(CMSContext
                 .RequestContext().getSite());
         if (mallProductCategoryList.isEmpty()) {
@@ -141,11 +141,10 @@ public class WidgetInfo implements Widget, PreProcessWidget{
     public void prepareContext(WidgetStyle style, ComponentProperties properties, Map<String, Object> variables
             , Map<String, String> parameters) {
         String mallProductSerial = (String) variables.get(MALL_PRODUCT_SERIAL);
-        MallProductCategoryRepository mallProductCategoryRepository = CMSContext.RequestContext()
-                .getWebApplicationContext().getBean(MallProductCategoryRepository.class);
+        MallProductCategoryRepository mallProductCategoryRepository = getCMSServiceFromCMSContext(MallProductCategoryRepository.class);
         List<MallProductCategory> mallProductCategorys = mallProductCategoryRepository
                 .findBySiteAndParent_Serial(CMSContext.RequestContext().getSite(), mallProductSerial);
-        GalleryItemRepository galleryItemRepository = CMSContext.RequestContext().getWebApplicationContext().getBean(GalleryItemRepository.class);
+        GalleryItemRepository galleryItemRepository = getCMSServiceFromCMSContext(GalleryItemRepository.class);
         List<MallProductCategoryModel> list = new ArrayList<>();
         for (MallProductCategory mallProductCategory : mallProductCategorys) {
             setContentURI(variables, mallProductCategory);
@@ -161,12 +160,15 @@ public class WidgetInfo implements Widget, PreProcessWidget{
         variables.put(PRODUCT_CATEGORY_MODEL, mallProductCategoryModel);
     }
 
+    @Override
+    public SiteType supportedSiteType() {
+        return SiteType.SITE_PC_SHOP;
+    }
 
-    private MallProductCategory initMallProductCategory(MallProductCategory parent) throws IOException {
+    public MallProductCategory initMallProductCategory(MallProductCategory parent) {
         CategoryService categoryService = CMSContext.RequestContext().getWebApplicationContext()
                 .getBean(CategoryService.class);
-        MallProductCategoryRepository mallProductCategoryRepository = CMSContext.RequestContext()
-                .getWebApplicationContext().getBean(MallProductCategoryRepository.class);
+        MallProductCategoryRepository mallProductCategoryRepository = getCMSServiceFromCMSContext(MallProductCategoryRepository.class);
         MallProductCategory mallProductCategory = new MallProductCategory();
         mallProductCategory.setGoodTitle("");
         mallProductCategory.setSite(CMSContext.RequestContext().getSite());
@@ -185,7 +187,7 @@ public class WidgetInfo implements Widget, PreProcessWidget{
 
     private void setContentURI(Map<String, Object> variables, MallProductCategory mallProductCategory) {
         try {
-            PageInfo contentPage = CMSContext.RequestContext().getWebApplicationContext().getBean(PageService.class)
+            PageInfo contentPage = getCMSServiceFromCMSContext(PageService.class)
                     .getClosestContentPage(mallProductCategory, (String) variables.get("uri"));
             mallProductCategory.setContentURI(contentPage.getPagePath());
         } catch (PageNotFoundException e) {
@@ -195,24 +197,11 @@ public class WidgetInfo implements Widget, PreProcessWidget{
     }
 
     /**
-     * 从CMSContext中获取CMSService的实现
-     *
-     * @param cmsService 需要返回的service接口
-     * @param <T>        返回的service实现
-     * @return
-     */
-    private <T> T getCMSServiceFromCMSContext(Class<T> cmsService) {
-        return CMSContext.RequestContext().
-                getWebApplicationContext().getBean(cmsService);
-    }
-
-
-    /**
      * 初始化数据源
      *
      * @return
      */
-    private Category initCategory() {
+    public Category initCategory() {
         CategoryService categoryService = getCMSServiceFromCMSContext(CategoryService.class);
         CategoryRepository categoryRepository = getCMSServiceFromCMSContext(CategoryRepository.class);
         Category category = new Category();
@@ -231,7 +220,7 @@ public class WidgetInfo implements Widget, PreProcessWidget{
      *
      * @return
      */
-    private Gallery initGallery(Category category) {
+    public Gallery initGallery(Category category) {
         GalleryService galleryService = getCMSServiceFromCMSContext(GalleryService.class);
         ContentService contentService = getCMSServiceFromCMSContext(ContentService.class);
         Gallery gallery = new Gallery();
@@ -250,16 +239,25 @@ public class WidgetInfo implements Widget, PreProcessWidget{
      * @param resourceService
      * @return
      */
-    private GalleryItem initGalleryItem(Gallery gallery, ResourceService resourceService) throws IOException {
+    public GalleryItem initGalleryItem(Gallery gallery, ResourceService resourceService) {
         ContentService contentService = getCMSServiceFromCMSContext(ContentService.class);
         GalleryItemService galleryItemService = getCMSServiceFromCMSContext(GalleryItemService.class);
         GalleryItem galleryItem = new GalleryItem();
         galleryItem.setTitle("默认图片标题");
         galleryItem.setDescription("这是一个默认图片");
         ClassPathResource classPathResource = new ClassPathResource("thumbnail.png", getClass().getClassLoader());
-        InputStream inputStream = classPathResource.getInputStream();
+        InputStream inputStream = null;
+        try {
+            inputStream = classPathResource.getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String imgPath = "_resources/" + UUID.randomUUID().toString() + ".png";
-        resourceService.uploadResource(imgPath, inputStream);
+        try {
+            resourceService.uploadResource(imgPath, inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         galleryItem.setThumbUri(imgPath);
         galleryItem.setSize("xxx");
         galleryItem.setGallery(gallery);
