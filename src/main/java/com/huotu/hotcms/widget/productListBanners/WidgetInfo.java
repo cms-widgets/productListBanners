@@ -10,7 +10,6 @@
 package com.huotu.hotcms.widget.productListBanners;
 
 import com.huotu.hotcms.service.common.ContentType;
-import com.huotu.hotcms.service.common.SiteType;
 import com.huotu.hotcms.service.entity.Category;
 import com.huotu.hotcms.service.entity.Gallery;
 import com.huotu.hotcms.service.entity.GalleryItem;
@@ -77,7 +76,7 @@ public class WidgetInfo implements Widget, PreProcessWidget{
 
     @Override
     public String dependVersion() {
-        return "1.0-SNAPSHOT";
+        return "1.0";
     }
 
     @Override
@@ -160,10 +159,6 @@ public class WidgetInfo implements Widget, PreProcessWidget{
         variables.put(PRODUCT_CATEGORY_MODEL, mallProductCategoryModel);
     }
 
-    @Override
-    public SiteType supportedSiteType() {
-        return SiteType.SITE_PC_SHOP;
-    }
 
     public MallProductCategory initMallProductCategory(MallProductCategory parent) {
         CategoryService categoryService = CMSContext.RequestContext().getWebApplicationContext()
@@ -181,7 +176,6 @@ public class WidgetInfo implements Widget, PreProcessWidget{
         mallProductCategory.setGallery(gallery);
         initGalleryItem(gallery, getCMSServiceFromCMSContext(ResourceService.class));
         mallProductCategoryRepository.save(mallProductCategory);
-
         return mallProductCategory;
     }
 
@@ -190,7 +184,7 @@ public class WidgetInfo implements Widget, PreProcessWidget{
             PageInfo contentPage = getCMSServiceFromCMSContext(PageService.class)
                     .getClosestContentPage(mallProductCategory, (String) variables.get("uri"));
             mallProductCategory.setContentURI(contentPage.getPagePath());
-        } catch (PageNotFoundException e) {
+        } catch (PageNotFoundException | NullPointerException e) {
             log.warn("...", e);
             mallProductCategory.setContentURI((String) variables.get("uri"));
         }
@@ -209,7 +203,6 @@ public class WidgetInfo implements Widget, PreProcessWidget{
         category.setName("默认数据源");
         categoryService.init(category);
         category.setSite(CMSContext.RequestContext().getSite());
-
         //保存到数据库
         categoryRepository.save(category);
         return category;
