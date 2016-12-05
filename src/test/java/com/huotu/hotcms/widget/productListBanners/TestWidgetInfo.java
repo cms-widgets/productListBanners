@@ -61,7 +61,7 @@ public class TestWidgetInfo extends WidgetTest {
         String mallProductSerial = (String) properties.get(WidgetInfo.MALL_PRODUCT_SERIAL);
         MallProductCategoryRepository mallProductCategoryRepository = widget.getCMSServiceFromCMSContext(MallProductCategoryRepository.class);
         List<MallProductCategory> mallProductCategorys = mallProductCategoryRepository
-                .findBySiteAndParent_Serial(CMSContext.RequestContext().getSite(), mallProductSerial);
+                .findBySiteAndParent_SerialAndDeletedFalse(CMSContext.RequestContext().getSite(), mallProductSerial);
         GalleryItemRepository galleryItemRepository = widget.getCMSServiceFromCMSContext(GalleryItemRepository.class);
         List<MallProductCategoryModel> list = new ArrayList<>();
         for (MallProductCategory mallProductCategory : mallProductCategorys) {
@@ -70,8 +70,6 @@ public class TestWidgetInfo extends WidgetTest {
             list.add(mallProductCategoryModel);
         }
         assertThat(list.size()).isEqualTo(webElement.findElements(By.tagName("a")).size());
-
-
     }
 
     @Override

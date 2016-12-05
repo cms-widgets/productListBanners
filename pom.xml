@@ -13,7 +13,7 @@
 
     <groupId>com.huotu.hotcms.widget.productListBanners</groupId>
     <artifactId>productListBanners</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
     <description>产品条幅列表，每个条幅对应一个产品数据源，每个数据源对应一个图库。</description>
@@ -66,13 +66,13 @@
         <dependency>
             <groupId>com.huotu.hotcms</groupId>
             <artifactId>widget-test</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.huotu.hotcms</groupId>
             <artifactId>widget-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.3.1</version>
         </dependency>
 
     </dependencies>
@@ -131,7 +131,7 @@
             <plugin>
                 <groupId>com.huotu.hotcms</groupId>
                 <artifactId>widget-preview</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.3.1</version>
             </plugin>
         </plugins>
     </build>

@@ -118,13 +118,17 @@ public class WidgetInfo implements Widget, PreProcessWidget{
         return null;
     }
 
+    @Override
+    public boolean disabled() {
+        return CMSContext.RequestContext().getSite().getOwner() != null && CMSContext.RequestContext().getSite().getOwner().getCustomerId() != null;
+    }
 
     @Override
     public ComponentProperties defaultProperties(ResourceService resourceService) throws IOException {
         ComponentProperties properties = new ComponentProperties();
         //查找商城产品数据源
         MallProductCategoryRepository mallProductCategoryRepository = getCMSServiceFromCMSContext(MallProductCategoryRepository.class);
-        List<MallProductCategory> mallProductCategoryList = mallProductCategoryRepository.findBySite(CMSContext
+        List<MallProductCategory> mallProductCategoryList = mallProductCategoryRepository.findBySiteAndDeletedFalse(CMSContext
                 .RequestContext().getSite());
         if (mallProductCategoryList.isEmpty()) {
             MallProductCategory mallProductCategory = initMallProductCategory(null);
@@ -142,7 +146,7 @@ public class WidgetInfo implements Widget, PreProcessWidget{
         String mallProductSerial = (String) variables.get(MALL_PRODUCT_SERIAL);
         MallProductCategoryRepository mallProductCategoryRepository = getCMSServiceFromCMSContext(MallProductCategoryRepository.class);
         List<MallProductCategory> mallProductCategorys = mallProductCategoryRepository
-                .findBySiteAndParent_Serial(CMSContext.RequestContext().getSite(), mallProductSerial);
+                .findBySiteAndParent_SerialAndDeletedFalse(CMSContext.RequestContext().getSite(), mallProductSerial);
         GalleryItemRepository galleryItemRepository = getCMSServiceFromCMSContext(GalleryItemRepository.class);
         List<MallProductCategoryModel> list = new ArrayList<>();
         for (MallProductCategory mallProductCategory : mallProductCategorys) {
@@ -182,7 +186,7 @@ public class WidgetInfo implements Widget, PreProcessWidget{
     private void setContentURI(Map<String, Object> variables, MallProductCategory mallProductCategory) {
         try {
             PageInfo contentPage = getCMSServiceFromCMSContext(PageService.class)
-                    .getClosestContentPage(mallProductCategory, (String) variables.get("uri"));
+                    .getClosestContentPage(mallProductCategory, (String) variables.get("uri"), null);
             mallProductCategory.setContentURI(contentPage.getPagePath());
         } catch (PageNotFoundException | NullPointerException e) {
             log.warn("...", e);
