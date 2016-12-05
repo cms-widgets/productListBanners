@@ -2,9 +2,9 @@
 <div class="mall-brands" xmlns:th="http://www.thymeleaf.org" th:id="${componentId}">
     <ul class="brands-list">
         <li class="fore" th:each="mallProduct:${dataList}">
-            <a  th:href="@{/${mallProduct.contentURI}}" href="javascript:void(0)"  target="_blank" title="">
+            <a th:href="@{/${mallProduct.contentURI}}" href="javascript:void(0)" target="_blank">
                 <img  th:each="galleryItem : ${mallProduct.galleryItems}"
-                      res:src="${galleryItem.thumbUri}" src="http://placehold.it/100x40?text=1" width="100" height="40" />
+                      res:src="${galleryItem.thumbUri}" src="http://placehold.it/120x20?text=1" />
             </a>
         </li>
     </ul>
